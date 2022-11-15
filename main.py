@@ -17,14 +17,10 @@ matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 from func import vid_info
 
-
-# 왜 윈도에서 안돌아가는가?
-
-
 class VideoPlayer(QMainWindow):
-    def __init__(self, next = 0):
+    def __init__(self, n = 0):
         super().__init__()
-        self.next = next
+        self.next = n
         self.sec = None
         self.ypos = None
         self.xpos = None
@@ -62,9 +58,9 @@ class VideoPlayer(QMainWindow):
         openImage.setFixedHeight(24)
         openImage.clicked.connect(self.open_image)
 
-        self.pbrate_label = QLineEdit()
-        self.pbrate_label.setFixedWidth(30)
-        # self.pbrate_label.textChanged.connect(self.pbrate_change)
+        self.pbrate_label = QPushButton('pbrate')
+        self.pbrate_label.setFixedWidth(80)
+        self.pbrate_label.clicked.connect(self.pbrate_change)
 
 
         # Create a widget for window contents
@@ -100,7 +96,7 @@ class VideoPlayer(QMainWindow):
         '''
         파일 오픈
         '''
-        self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Movie", QDir.homePath())
+        self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Video", './', self.tr("Video Files (*.mp4)"))
         self.mode = 0
 
         print(self.fileDir)
@@ -116,8 +112,6 @@ class VideoPlayer(QMainWindow):
                     break
             print(self.fileName)
 
-        # print(self.mediaPlayer.metaData(QMediaMetaData.VideoFrameRate))
-
     def exitCall(self):
         '''
         프로그램 종료
@@ -130,11 +124,8 @@ class VideoPlayer(QMainWindow):
         '''
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
-            # print(self.mediaPlayer.metaData(QMediaMetaData.VideoFrameRate))
-            # print(self.mediaPlayer.)
         else:
             self.mediaPlayer.play()
-            # print(self.mediaPlayer.metaData(QMediaMetaData.Resolution))
 
     def mediaStateChanged(self, state):
         '''
@@ -153,25 +144,26 @@ class VideoPlayer(QMainWindow):
         재생시간 막대 위치 이동
         :param position: 해당 값으로 이동
         '''
-        # self.mediaStateChanged()
         self.positionSlider.setValue(position)
-        # print(self.positionSlider.value())
 
     def durationChanged(self, duration):
         '''
         재생시간 막대 크기 설정
         '''
         self.positionSlider.setRange(0, duration)
+        self.positionSlider.setValue(1)
 
     def pbrate_change(self):
         '''
         재생속도 변경하는 함수
         '''
-        if self.pbrate_label.text() == '':
-            self.mediaPlayer.setPlaybackRate(1)
-        else:
-            self.mediaPlayer.setPlaybackRate(int(self.pbrate_label.text()))
-        print('change')
+        pbrate, ok = QInputDialog.getInt(self, '재생속도 설정', '재생속도 입력 : ')
+
+        if ok:
+            if pbrate == 0:
+                self.mediaPlayer.setPlaybackRate(1)
+            else:
+                self.mediaPlayer.setPlaybackRate(pbrate)
 
     def setPosition(self, position):
         """
@@ -189,38 +181,36 @@ class VideoPlayer(QMainWindow):
 
     def rightKey_pressed(self):
         '''
-        오른쪽 키 누르는 이벤트 핸들러 - 5초 앞으로 이동
+        오른쪽 키 눌렀을 때 작동 - 5초 앞으로 이동
         '''
         self.positionSlider.setValue(self.positionSlider.value() + 5000)
         print(self.positionSlider.value())
-        print('asdf')
 
     def leftkey_pressed(self):
         """
-        왼쪽 방향키 누르는 이벤트 핸들러 - 5초 뒤로 이동
+        왼쪽 방향키 눌렀을 때 작동 - 5초 뒤로 이동
         """
         self.positionSlider.setValue(self.positionSlider.value() - 5000)
-        print('qwer')
 
-    def keyPressEvent(self, e): # 작동 안하는중
-        """
+    def space_pressed(self):
+        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
+            self.mediaPlayer.pause()
+        else:
+            self.mediaPlayer.play()
 
-        :param e:
-        """
-        if e.key() == Qt.Key_Any:
-            # self.rightKey_pressed()
-            print("right key pressed")
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Right:
+            self.rightKey_pressed()
         elif e.key() == Qt.Key_Left:
             self.leftkey_pressed()
-
-
+        elif e.key() == Qt.Key_Space:
+            self.space_pressed()
 
     def on_press(self, event):
         """
         마우스 클릭 인식 이벤트 핸들러
         :param event: 마울스 클릭했을 때 좌표 저장
         """
-        # print('you pressed', event.button, event.xdata, event.ydata)
 
         wb = load_workbook(r"폐사체데이터.xlsx")
         ws = wb.worksheets[0]
@@ -251,6 +241,8 @@ class VideoPlayer(QMainWindow):
         if self.mode == 0:
             os.remove('original.png')
 
+    def plt_close(self):
+        pass
     def cap_img(self):
         """
         이미지 캡처 함수
@@ -267,13 +259,14 @@ class VideoPlayer(QMainWindow):
         img = plt.imread('original.png')
         plt.figure(figsize=(16, 9))
         plt.imshow(img)
-        plt.connect('button_press_event', self.on_press) # 이벤트 핸들러
+        plt.connect('button_press_event', self.on_press) # 이벤트 핸들러다.....
+        # plt.connect('c press', self.)
         # plot_unit_circle()
         plt.axis('equal')
         plt.show()
 
     def open_image(self):
-        img_dir, _ = QFileDialog.getOpenFileName(self, "Select Image", QDir.homePath())
+        img_dir, _ = QFileDialog.getOpenFileName(self, "Select Image", './', self.tr("Images (*.jpg *.png *.jpeg)"))
         self.mode = 1
 
         if img_dir != '':
@@ -284,7 +277,7 @@ class VideoPlayer(QMainWindow):
                     break
 
             img = plt.imread(img_dir)
-            plt.figure(figsize=(16, 9))
+            plt.figure(dpi=100)
             plt.imshow(img)
             plt.connect('button_press_event', self.on_press)
             plt.axis('equal')
@@ -292,8 +285,8 @@ class VideoPlayer(QMainWindow):
 
 from func import excel_linecheck
 app = QApplication(sys.argv)
-videoplayer = VideoPlayer(next=excel_linecheck())
-videoplayer.resize(640, 480)
+videoplayer = VideoPlayer(n=excel_linecheck())
+screen_rect = app.desktop().screenGeometry()
+videoplayer.resize(screen_rect.width(), screen_rect.height())
 videoplayer.show()
-print(videoplayer.xpos)
 sys.exit(app.exec_())

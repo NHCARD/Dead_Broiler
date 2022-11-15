@@ -1,4 +1,5 @@
 from openpyxl import load_workbook, worksheet, workbook
+from openpyxl.styles import Alignment
 
 def vid_info(file_name):  # 모듈화
     for i in range(len(file_name)):
@@ -25,6 +26,16 @@ def excel_linecheck():
             break
     return n
 
+def cell_absorb():
+    wb = load_workbook(r'./폐사체데이터.xlsx')
+    ws = wb.worksheets[0]
+
+    ws.merge_cells(start_row=58, end_row=59, start_column=1, end_column=1)
+    # ws['A39'].alignment = Alignment(vertical='center', horizontal='center')
+    wb.save('./폐사체데이터.xlsx')
+
+
+# cell_absorb()
 # def chicdata_Save():
 #     wb = load_workbook(r"폐사체데이터.xlsx")
 #     ws = wb.worksheets[0]
