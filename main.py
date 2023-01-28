@@ -97,6 +97,7 @@ class VideoPlayer(QMainWindow):
         파일 오픈
         '''
         self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Video", './', self.tr("Video Files (*.mp4)"))
+        print(self.fileDir)
         self.mode = 0
 
         print(self.fileDir)
@@ -260,8 +261,6 @@ class VideoPlayer(QMainWindow):
         plt.figure(figsize=(16, 9))
         plt.imshow(img)
         plt.connect('button_press_event', self.on_press) # 이벤트 핸들러다.....
-        # plt.connect('c press', self.)
-        # plot_unit_circle()
         plt.axis('equal')
         plt.show()
 
@@ -282,6 +281,9 @@ class VideoPlayer(QMainWindow):
             plt.connect('button_press_event', self.on_press)
             plt.axis('equal')
             plt.show()
+
+    def img_30sec(self):
+        pass
 
 from func import excel_linecheck
 app = QApplication(sys.argv)
