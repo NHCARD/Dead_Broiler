@@ -12,8 +12,8 @@ def vid_info(file_name):  # 모듈화
     return ch, day
 
 
-def excel_linecheck():
-    wb = load_workbook(r"폐사체데이터.xlsx")
+def excel_linecheck(xlsx_name):
+    wb = load_workbook(xlsx_name)
     ws = wb.worksheets[0]
 
     n = 2
@@ -22,17 +22,18 @@ def excel_linecheck():
         if ws[f'E{i}'].value is not None:
             n += 1
         else:
-            wb.save('./폐사체데이터.xlsx')
+            wb.save(xlsx_name)
             break
     return n
 
-def cell_absorb():
-    wb = load_workbook(r'./폐사체데이터.xlsx')
+
+def cell_absorb(xlsx_name):
+    wb = load_workbook(xlsx_name)
     ws = wb.worksheets[0]
 
     ws.merge_cells(start_row=58, end_row=59, start_column=1, end_column=1)
     # ws['A39'].alignment = Alignment(vertical='center', horizontal='center')
-    wb.save('./폐사체데이터.xlsx')
+    wb.save(xlsx_name)
 
 
 # cell_absorb()

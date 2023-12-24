@@ -25,6 +25,7 @@ class VideoPlayer(QMainWindow):
         self.ypos = None
         self.xpos = None
         self.mode = None
+        self.xlsx_name = '폐사체데이터_long.xlsx'
         self.setWindowTitle("")
 
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
@@ -85,6 +86,7 @@ class VideoPlayer(QMainWindow):
         # Set widget to contain window contents
         wid.setLayout(layout)
 
+        self.mediaPlayer = QMediaPlayer(self, flags=QMediaPlayer.VideoSurface)
         self.mediaPlayer.setVideoOutput(videoWidget)
         self.mediaPlayer.stateChanged.connect(self.mediaStateChanged)
         self.mediaPlayer.positionChanged.connect(self.positionChanged)
@@ -96,14 +98,13 @@ class VideoPlayer(QMainWindow):
         '''
         파일 오픈
         '''
-        self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Video", './', self.tr("Video Files (*.mp4)"))
+        self.fileDir, _ = QFileDialog.getOpenFileName(self, "Open Video", r'E:\4차\download\long_download\test\20231118', self.tr("Video Files (*.mp4)"))
         print(self.fileDir)
         self.mode = 0
 
         print(self.fileDir)
         if self.fileDir != '':
-            self.mediaPlayer.setMedia(
-                QMediaContent(QUrl.fromLocalFile(self.fileDir)))
+            self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(self.fileDir)))
             self.playButton.setEnabled(True)
 
             for i in range(-1, -(int(len(self.fileDir))), -1):
@@ -213,7 +214,7 @@ class VideoPlayer(QMainWindow):
         :param event: 마울스 클릭했을 때 좌표 저장
         """
 
-        wb = load_workbook(r"폐사체데이터.xlsx")
+        wb = load_workbook(self.xlsx_name)
         ws = wb.worksheets[0]
 
         self.xpos, self.ypos = int(event.xdata), int(event.ydata)
@@ -225,18 +226,14 @@ class VideoPlayer(QMainWindow):
 
         # alignment = Alignment(vertical='center', horizontal='center')
         print(self.xpos)
-        ws[f'E{self.next}'].value = f'{self.xpos}, {self.ypos}'
+        ws[f'D{self.next}'].value = f'{self.xpos}, {self.ypos}'
         if self.mode == 0:
             ws[f'C{self.next}'].value = self.fileName
         ws[f'A{self.next}'].value = int(day)
         ws[f'B{self.next}'].value = int(ch)
-        try:
-            ws[f'D{self.next}'].value = save_time
-        except:
-            pass
 
         self.next += 1
-        wb.save('./폐사체데이터.xlsx')
+        wb.save(self.xlsx_name)
         plt.close('all')
 
         if self.mode == 0:
@@ -255,7 +252,7 @@ class VideoPlayer(QMainWindow):
 
         self.sec = self.positionSlider.value() // 1000
 
-        os.system(fr"ffmpeg -vsync 2 -ss {self.sec} -t {self.sec+1} -i {self.fileName} -an -vf thumbnail=25 {'./original'}.png ")
+        os.system(fr"ffmpeg -vsync 2 -ss {self.sec} -t {self.sec+1} -i {self.fileDir} -an -vf thumbnail=25 {'./original'}.png ")
 
         img = plt.imread('original.png')
         plt.figure(figsize=(16, 9))
